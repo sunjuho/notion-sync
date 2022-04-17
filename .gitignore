@@ -9,6 +9,4 @@
 
 /__pycache__/
 .idea
-credentials.json
-token.json
-notion_keys.json
+keys

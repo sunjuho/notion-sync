@@ -7,12 +7,12 @@ NOTION_VERSION = "2022-02-22"
 payload = {"page_size": 100}
 
 # account info
-with open('notion_keys.json') as json_file:
+with open('keys/notion_keys.json') as json_file:
     data = json.load(json_file)
 
-    PERSONAL = data['PERSONAL'][0]
-    PUBLIC = data['PUBLIC'][0]
-    EXAMPLE_DB = data['EXAMPLE_DB'][0]
+    PERSONAL = data['PERSONAL']
+    PUBLIC = data['PUBLIC']
+    EXAMPLE_DB = data['EXAMPLE_DB']
 
 
 # initialize headers info
