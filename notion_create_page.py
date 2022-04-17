@@ -1,6 +1,6 @@
 import notion
 
-# 모듈화
+# todo : 모듈화
 
 page = {
     "parent": {
