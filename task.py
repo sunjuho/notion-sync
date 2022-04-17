@@ -2,12 +2,20 @@
 from __future__ import print_function
 
 import os.path
+import json
 
 from google.auth.transport.requests import Request
 from google.oauth2.credentials import Credentials
 from google_auth_oauthlib.flow import InstalledAppFlow
 from googleapiclient.discovery import build
 from googleapiclient.errors import HttpError
+
+# account info
+with open('keys/task_keys.json') as json_file:
+    data = json.load(json_file)
+
+    PERSONAL = data['PERSONAL']
+    PUBLIC = data['PUBLIC']
 
 # If modifying these scopes, delete the file token.json.
 SCOPES = ['https://www.googleapis.com/auth/tasks']
@@ -52,6 +60,29 @@ def select_task_list():
             print(u'{0} ( {1} )'.format(item['title'], item['id']))
             task_lists[item['title']] = item['id']
         return task_lists
+
+    except HttpError as err:
+        print(err)
+
+
+def select_tasks(task_list):
+    try:
+        service = build('tasks', 'v1', credentials=creds)
+
+        # Call the Tasks API
+        results = service.tasks().list(tasklist=task_list).execute()
+        items = results.get('items', [])
+
+        if not items:
+            print('No tasks found.')
+            return
+
+        print('Tasks:')
+        tasks = {}
+        for item in items:
+            print(u'{0} ( {1} )'.format(item['title'], item['id']))
+            tasks[item['title']] = item['id']
+        return tasks
 
     except HttpError as err:
         print(err)
