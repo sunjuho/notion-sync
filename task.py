@@ -41,11 +41,11 @@ if not creds or not creds.valid:
     with open('keys/token.json', 'w') as token:
         token.write(creds.to_json())
 
+service = build('tasks', 'v1', credentials=creds)
+
 
 def select_task_list():
     try:
-        service = build('tasks', 'v1', credentials=creds)
-
         # Call the Tasks API
         results = service.tasklists().list(maxResults=10).execute()
         items = results.get('items', [])
@@ -67,8 +67,6 @@ def select_task_list():
 
 def select_tasks(task_list):
     try:
-        service = build('tasks', 'v1', credentials=creds)
-
         # Call the Tasks API
         results = service.tasks().list(tasklist=task_list).execute()
         items = results.get('items', [])
@@ -91,8 +89,7 @@ def select_tasks(task_list):
 
 def create_task(task_list, task):
     try:
-        service = build('tasks', 'v1', credentials=creds)
-
+        # Call the Tasks API
         result = service.tasks().insert(tasklist=task_list, body=task).execute()
         print(result)
         return result['id']

@@ -16,7 +16,7 @@ with open('keys/notion_keys.json') as json_file:
 
 
 # initialize headers info
-def getHeaders(parameter):
+def get_headers(parameter):
     headers = {
         "Accept": "application/json",
         "Notion-Version": NOTION_VERSION,
@@ -29,7 +29,7 @@ def getHeaders(parameter):
 # Query a database
 # usage example: notion.select_pages(notion.PERSONAL)
 def select_pages(account):
-    headers = getHeaders(account)
+    headers = get_headers(account)
     url = "https://api.notion.com/v1/databases/" + account["DATABASE_ID"] + "/query"
 
     response = requests.request("POST", url, headers=headers)
@@ -45,7 +45,7 @@ def select_pages(account):
 # Retrieve a page
 # usage example: notion.select_page(notion.PUBLIC, "c4e4c3b3-8747-4a93-ba4a-7b148d5ca8dc")
 def select_page(account, page_id):
-    headers = getHeaders(account)
+    headers = get_headers(account)
     url = "https://api.notion.com/v1/pages/" + page_id
 
     response = requests.request("GET", url, headers=headers)
@@ -58,7 +58,7 @@ def select_page(account, page_id):
 # Retrieve block children
 # usage example: notion.select_page_contents(notion.PUBLIC, "c4e4c3b3-8747-4a93-ba4a-7b148d5ca8dc")
 def select_page_contents(account, page_id):
-    headers = getHeaders(account)
+    headers = get_headers(account)
     url = "https://api.notion.com/v1/blocks/" + page_id + "/children"
 
     response = requests.request("GET", url, headers=headers)
@@ -72,7 +72,7 @@ def select_page_contents(account, page_id):
 # Create a page with content
 # usage example: notion.create_page(notion.PERSONAL, page)
 def create_page(account, page):
-    headers = getHeaders(account)
+    headers = get_headers(account)
     url = "https://api.notion.com/v1/pages"
     # json to text
     page = json.dumps(page)
@@ -86,7 +86,7 @@ def create_page(account, page):
 
 # usage example: notion.select_page_by_google_task_id(notion.PUBLIC, "dHRVYWtGUXFhckZuMjk3ZQ")
 def select_page_by_google_task_id(account, task_id):
-    headers = getHeaders(account)
+    headers = get_headers(account)
     url = "https://api.notion.com/v1/databases/" + account["DATABASE_ID"] + "/query"
 
     search_filter = {
@@ -107,7 +107,7 @@ def select_page_by_google_task_id(account, task_id):
 
 # usage example: notion.select_page_not_synced(notion.PUBLIC)
 def select_page_not_synced(account):
-    headers = getHeaders(account)
+    headers = get_headers(account)
     url = "https://api.notion.com/v1/databases/" + account["DATABASE_ID"] + "/query"
 
     search_filter = {

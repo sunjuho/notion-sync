@@ -73,5 +73,5 @@ page = {
     }
 }
 
-#personal_test_db_create_result = notion.create_page(notion.EXAMPLE_DB, page)
+# personal_test_db_create_result = notion.create_page(notion.EXAMPLE_DB, page)
 notion.select_pages(notion.EXAMPLE_DB)
