@@ -82,3 +82,48 @@ def create_page(account, page):
     item = json_object
     print(item)
     return item
+
+
+# usage example: notion.select_page_by_google_task_id(notion.PUBLIC, "dHRVYWtGUXFhckZuMjk3ZQ")
+def select_page_by_google_task_id(account, task_id):
+    headers = getHeaders(account)
+    url = "https://api.notion.com/v1/databases/" + account["DATABASE_ID"] + "/query"
+
+    search_filter = {
+        "filter": {
+            "property": "google task id",
+            "rich_text": {
+                "equals": task_id
+            }
+        }
+    }
+
+    response = requests.request("POST", url, headers=headers, json=search_filter)
+    json_object = json.loads(response.text)
+    item = json_object["results"][0]
+    print(item)
+    return item
+
+
+# usage example: notion.select_page_not_synced(notion.PUBLIC)
+def select_page_not_synced(account):
+    headers = getHeaders(account)
+    url = "https://api.notion.com/v1/databases/" + account["DATABASE_ID"] + "/query"
+
+    search_filter = {
+        "filter": {
+            "property": "google task id",
+            "rich_text": {
+                "is_empty": True
+            }
+        }
+    }
+
+    response = requests.request("POST", url, headers=headers, json=search_filter)
+    json_object = json.loads(response.text)
+
+    items = json_object["results"]
+    if items is not None:
+        for item in items:
+            print(item)
+    return items
