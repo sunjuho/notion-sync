@@ -81,8 +81,21 @@ def select_tasks(task_list):
         tasks = {}
         for item in items:
             print(u'{0} ( {1} )'.format(item['title'], item['id']))
+            print(item)
             tasks[item['title']] = item['id']
         return tasks
+
+    except HttpError as err:
+        print(err)
+
+
+def create_task(task_list, task):
+    try:
+        service = build('tasks', 'v1', credentials=creds)
+
+        result = service.tasks().insert(tasklist=task_list, body=task).execute()
+        print(result)
+        return result['id']
 
     except HttpError as err:
         print(err)
