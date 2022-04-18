@@ -127,3 +127,16 @@ def select_page_not_synced(account):
         for item in items:
             print(item)
     return items
+
+
+def update_page_properties(account, page_id, properties):
+    headers = get_headers(account)
+    url = "https://api.notion.com/v1/pages/" + page_id
+
+    response = requests.request("PATCH", url, headers=headers, json=properties)
+    json_object = json.loads(response.text)
+
+    item = json_object
+    if item is not None:
+        print(item)
+    return item
