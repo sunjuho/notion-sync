@@ -140,3 +140,36 @@ def update_page_properties(account, page_id, properties):
     if item is not None:
         print(item)
     return item
+
+# 특정 시간 이후로(optional), 최근 편집순 정렬 조회.
+# usage example: notion.select_page_edited(notion.PUBLIC, last_synced_date='2022-04-18T11:43:00.000Z')
+def select_page_edited(account, last_synced_date=None):
+    headers = get_headers(account)
+    url = "https://api.notion.com/v1/databases/" + account["DATABASE_ID"] + "/query"
+
+    search_filter = {
+        "sorts": [
+            {
+                "timestamp": "last_edited_time",
+                "direction": "descending"
+            }
+        ]
+    }
+
+    # 최근 동기화 성공 일시가 있으면 성공 일기 기준 이후 조회
+    if last_synced_date:
+        search_filter["filter"] = {
+            "timestamp": "last_edited_time",
+            "last_edited_time": {
+                "after": last_synced_date
+            }
+        }
+
+    response = requests.request("POST", url, headers=headers, json=search_filter)
+    json_object = json.loads(response.text)
+
+    items = json_object["results"]
+    if items is not None:
+        for item in items:
+            print(item)
+    return items
