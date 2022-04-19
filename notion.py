@@ -123,7 +123,7 @@ def select_page_not_synced(account):
     json_object = json.loads(response.text)
 
     items = json_object["results"]
-    if items is not None:
+    if len(items):
         for item in items:
             print(item)
     return items
@@ -146,7 +146,7 @@ def update_page_properties(account, page_id, properties):
 
 # 특정 시간 이후로(optional), 최근 편집순 정렬 조회.
 # usage example: notion.select_page_edited(notion.PUBLIC, last_synced_date='2022-04-18T11:43:00.000Z')
-def select_page_edited(account, last_synced_date=None):
+def select_page_edited(account, last_synced_time=None):
     headers = get_headers(account)
     url = "https://api.notion.com/v1/databases/" + account["DATABASE_ID"] + "/query"
 
@@ -160,11 +160,11 @@ def select_page_edited(account, last_synced_date=None):
     }
 
     # 최근 동기화 성공 일시가 있으면 성공 일시 기준 이후 조회
-    if last_synced_date:
+    if last_synced_time:
         search_filter["filter"] = {
             "timestamp": "last_edited_time",
             "last_edited_time": {
-                "after": last_synced_date
+                "after": last_synced_time
             }
         }
 
@@ -172,7 +172,7 @@ def select_page_edited(account, last_synced_date=None):
     json_object = json.loads(response.text)
 
     items = json_object["results"]
-    if items is not None:
+    if len(items):
         for item in items:
             print(item)
     return items

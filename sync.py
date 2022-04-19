@@ -1,5 +1,11 @@
 import notion
 import task
+import os.path
+
+if os.path.exists('last_synced_time.txt'):
+    file = open('last_synced_time.txt', 'r')
+    last_synced_time = file.read()
+    file.close()
 
 
 # notion page로부터 task에 넣을 형태로 변환
@@ -32,7 +38,7 @@ def get_task_from_notion(page):
 def create_task_from_notion(notion_account, task_account):
     items = notion.select_page_not_synced(notion_account)
 
-    if items is not None:
+    if len(items):
         for item in items:
             print(item)
             page_id = item['id']
@@ -64,17 +70,21 @@ def create_task_from_notion(notion_account, task_account):
 
             notion.update_page_properties(notion_account, page_id, notion_properties)
 
-
+# 노션 값으로 태스크 수정
 def update_task_from_notion(notion_account, task_account):
-    # todo 마지막 동기화 성공 날짜 기준으로 동작할 것
-    last_synced_date = '2022-04-19T08:52:52.000Z'
-    pages = notion.select_page_edited(notion_account, last_synced_date=last_synced_date)
+    pages = notion.select_page_edited(notion_account, last_synced_time=last_synced_time)
 
-    if pages is not None:
+    if len(pages):
+        f = open('last_synced_time.txt', 'w')
+        updated = ""
         for page in pages:
             if page['properties']['google task id']['rich_text']:
                 update_task = get_task_from_notion(page)
 
                 google_task_id = notion.get_task_id_from_page(page)
                 updated = task.patch_task(task_account, google_task_id, update_task)
-        # todo : 동기화 성공 시간 기록
+
+        # 동기화 성공 시간 기록
+        print("last_synced_time : " + updated)
+        f.write(updated)
+        f.close()
