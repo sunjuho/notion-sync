@@ -129,6 +129,8 @@ def select_page_not_synced(account):
     return items
 
 
+# update notion page.
+# usage example: notion.update_page_properties(notion_account, page_id, notion_properties)
 def update_page_properties(account, page_id, properties):
     headers = get_headers(account)
     url = "https://api.notion.com/v1/pages/" + page_id
@@ -140,6 +142,7 @@ def update_page_properties(account, page_id, properties):
     if item is not None:
         print(item)
     return item
+
 
 # 특정 시간 이후로(optional), 최근 편집순 정렬 조회.
 # usage example: notion.select_page_edited(notion.PUBLIC, last_synced_date='2022-04-18T11:43:00.000Z')
@@ -156,7 +159,7 @@ def select_page_edited(account, last_synced_date=None):
         ]
     }
 
-    # 최근 동기화 성공 일시가 있으면 성공 일기 기준 이후 조회
+    # 최근 동기화 성공 일시가 있으면 성공 일시 기준 이후 조회
     if last_synced_date:
         search_filter["filter"] = {
             "timestamp": "last_edited_time",
@@ -173,3 +176,7 @@ def select_page_edited(account, last_synced_date=None):
         for item in items:
             print(item)
     return items
+
+
+def get_task_id_from_page(page):
+    return page['properties']['google task id']['rich_text'][0]['text']['content']

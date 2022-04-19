@@ -63,3 +63,18 @@ def create_task_from_notion(notion_account, task_account):
             }
 
             notion.update_page_properties(notion_account, page_id, notion_properties)
+
+
+def update_task_from_notion(notion_account, task_account):
+    # todo 마지막 동기화 성공 날짜 기준으로 동작할 것
+    last_synced_date = '2022-04-19T08:52:52.000Z'
+    pages = notion.select_page_edited(notion_account, last_synced_date=last_synced_date)
+
+    if pages is not None:
+        for page in pages:
+            if page['properties']['google task id']['rich_text']:
+                update_task = get_task_from_notion(page)
+
+                google_task_id = notion.get_task_id_from_page(page)
+                updated = task.patch_task(task_account, google_task_id, update_task)
+        # todo : 동기화 성공 시간 기록
