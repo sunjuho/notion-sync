@@ -2,6 +2,7 @@ import notion
 import task
 import os.path
 
+last_synced_time = None
 if os.path.exists('last_synced_time.txt'):
     file = open('last_synced_time.txt', 'r')
     last_synced_time = file.read()
