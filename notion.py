@@ -12,7 +12,6 @@ with open('keys/notion_keys.json') as json_file:
 
     PERSONAL = data['PERSONAL']
     PUBLIC = data['PUBLIC']
-    EXAMPLE_DB = data['EXAMPLE_DB']
 
 
 # initialize headers info
@@ -145,7 +144,7 @@ def update_page_properties(account, page_id, properties):
 
 
 # 특정 시간 이후로(optional), 최근 편집순 정렬 조회.
-# usage example: notion.select_page_edited(notion.PUBLIC, last_synced_date='2022-04-18T11:43:00.000Z')
+# usage example: notion.select_page_edited(notion.PUBLIC, last_synced_time='2022-04-18T11:43:00.000Z')
 def select_page_edited(account, last_synced_time=None):
     headers = get_headers(account)
     url = "https://api.notion.com/v1/databases/" + account["DATABASE_ID"] + "/query"

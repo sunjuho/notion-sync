@@ -1,12 +1,6 @@
 import notion
 import task
-import os.path
-
-last_synced_time = None
-if os.path.exists('last_synced_time.txt'):
-    file = open('last_synced_time.txt', 'r')
-    last_synced_time = file.read()
-    file.close()
+import json
 
 
 # notion page로부터 task에 넣을 형태로 변환
@@ -71,12 +65,13 @@ def create_task_from_notion(notion_account, task_account):
 
             notion.update_page_properties(notion_account, page_id, notion_properties)
 
-# 노션 값으로 태스크 수정
+
+# 노션 값으로 태스크 수정. 이후 노션 정보에 최근 수정 정보 최신화.
 def update_task_from_notion(notion_account, task_account):
-    pages = notion.select_page_edited(notion_account, last_synced_time=last_synced_time)
+    print("동기화 동작 기준 시간 : " + notion_account['LAST_SYNCED_TIME'])
+    pages = notion.select_page_edited(notion_account, last_synced_time=notion_account['LAST_SYNCED_TIME'])
 
     if len(pages):
-        f = open('last_synced_time.txt', 'w')
         updated = ""
         for page in pages:
             if page['properties']['google task id']['rich_text']:
@@ -87,5 +82,16 @@ def update_task_from_notion(notion_account, task_account):
 
         # 동기화 성공 시간 기록
         print("last_synced_time : " + updated)
-        f.write(updated)
-        f.close()
+        notion_account['LAST_SYNCED_TIME'] = updated
+
+    # togo : pages 가 없더라도 동기화에 성공한 건 맞음.
+
+    return notion_account
+
+
+# notion_keys파일에 마지막 동기화 시간 수정
+def update_notion_keys_file(notion_account_personal, notion_account_public, ):
+    json_object = {'PERSONAL': notion_account_personal, 'PUBLIC': notion_account_public}
+    file = open('keys/notion_keys.json', 'w')
+    json.dump(json_object, file)
+    file.close()
