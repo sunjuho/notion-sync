@@ -98,6 +98,17 @@ def create_task(task_list, task):
         print(err)
 
 
+def select_task(task_list, task_id):
+    try:
+        # Call the Tasks API
+        result = service.tasks().get(tasklist=task_list, task=task_id).execute()
+        print(result)
+        return result
+
+    except HttpError as err:
+        print(err)
+
+
 def patch_task(task_list, task_id, task):
     try:
         # Call the Tasks API

@@ -1,7 +1,7 @@
 import notion
 import task
 import json
-
+import datetime
 
 # notion page로부터 task에 넣을 형태로 변환
 def get_task_from_notion(page):
@@ -36,7 +36,7 @@ def create_task_from_notion(notion_account, task_account):
     if len(items):
         for item in items:
             print(item)
-            page_id = item['id']
+            notion_page_id = item['id']
 
             insert_task = get_task_from_notion(item)
             """
@@ -63,7 +63,7 @@ def create_task_from_notion(notion_account, task_account):
                 }
             }
 
-            notion.update_page_properties(notion_account, page_id, notion_properties)
+            notion.update_page_properties(notion_account, notion_page_id, notion_properties)
 
 
 # 노션 값으로 태스크 수정. 이후 노션 정보에 최근 수정 정보 최신화.
@@ -95,3 +95,92 @@ def update_notion_keys_file(notion_account_personal, notion_account_public, ):
     file = open('keys/notion_keys.json', 'w')
     json.dump(json_object, file)
     file.close()
+
+
+# 켜질 때 최초 동작. 읽고, past_pages 생성. 이후 이 past_pages로 트리거 동작.
+def init_read_notion(notion_account, task_account):
+    notion_account['past_pages'] = {}
+    pages = notion.select_pages(notion_account)
+
+    if pages:
+        for page in pages:
+            notion_page_id = page['id']
+
+            # 연동
+            if page['properties']['google task id']['rich_text']:
+                google_task_id = page['properties']['google task id']['rich_text'][0]['text']['content']
+
+            # 미연동
+            else:
+                google_task_id = create_task_from_page(notion_account, task_account, page)
+
+            notion_account['past_pages'][notion_page_id] = google_task_id
+
+# 주기적 싱크 동작
+def sync_form_notion_to_task(notion_account, task_account):
+    notion_account['now_pages'] = {}
+    d = datetime.datetime.utcnow()  # <-- get time in UTC
+    search_time = d.isoformat("T") + "Z"
+    pages = notion.select_pages(notion_account)
+
+    if pages:
+        for page in pages:
+            notion_page_id = page['id']
+
+            # 연동
+            if page['properties']['google task id']['rich_text']:
+                google_task_id = page['properties']['google task id']['rich_text'][0]['text']['content']
+
+                if page['last_edited_time'] > notion_account['LAST_SYNCED_TIME']:
+                    update_task = get_task_from_notion(page)
+
+                    synced_task = task.select_task(task_account, google_task_id)
+
+                    if update_task['title'] != synced_task['title'] or update_task['status'] != synced_task['status'] and \
+                            update_task['due'] != synced_task['due']:
+                        task.patch_task(task_account, google_task_id, update_task)
+                        # 변동 기록 시간 최신화
+                        notion_account['LAST_SYNCED_TIME'] = page['last_edited_time']
+
+                notion_account['past_pages'].pop(notion_page_id)
+            # 미연동
+            else:
+                google_task_id = create_task_from_page(notion_account, task_account, page)
+
+            notion_account['now_pages'][notion_page_id] = google_task_id
+
+    if len(notion_account['past_pages']) > 0:
+        for past_notion_page_id in notion_account['past_pages'].keys():
+
+            page = notion.select_page(notion_account, past_notion_page_id)
+            # 노션에서 삭제된 경우
+            if page is None:
+                past_google_task_id = notion_account['past_pages'][past_notion_page_id]
+                task.delete_task(task_account, past_google_task_id) # todo : delete_task 만들기
+
+    notion_account['past_pages'] = notion_account['now_pages']
+    notion_account['now_pages'] = {}
+
+
+def create_task_from_page(notion_account, task_account, page):
+    notion_page_id = page['id']
+    insert_task = get_task_from_notion(page)
+
+    google_task_id = task.create_task(task_account, insert_task)
+
+    notion_properties = {
+        "properties": {
+            "google task id": {
+                "rich_text": [{
+                    "type": "text",
+                    "text": {
+                        "content": google_task_id
+                    }
+                }]
+            }
+        }
+    }
+
+    notion.update_page_properties(notion_account, notion_page_id, notion_properties)
+
+    return google_task_id

@@ -28,24 +28,28 @@ def get_headers(parameter):
 # Query a database
 # usage example: notion.select_pages(notion.PERSONAL)
 def select_pages(account):
-    headers = get_headers(account)
-    url = "https://api.notion.com/v1/databases/" + account["DATABASE_ID"] + "/query"
+    try:
+        headers = get_headers(account)
+        url = "https://api.notion.com/v1/databases/" + account["DATABASE_ID"] + "/query"
 
-    response = requests.request("POST", url, headers=headers)
+        response = requests.request("POST", url, headers=headers)
 
-    # str to json
-    json_object = json.loads(response.text)
-    items = json_object["results"]
-    for item in items:
-        print(item)
-    return items
+        # str to json
+        json_object = json.loads(response.text)
+        items = json_object["results"]
+        for item in items:
+            print(item)
+        return items
+
+    except:
+        print("err")
 
 
 # Retrieve a page
 # usage example: notion.select_page(notion.PUBLIC, "c4e4c3b3-8747-4a93-ba4a-7b148d5ca8dc")
-def select_page(account, page_id):
+def select_page(account, notion_page_id):
     headers = get_headers(account)
-    url = "https://api.notion.com/v1/pages/" + page_id
+    url = "https://api.notion.com/v1/pages/" + notion_page_id
 
     response = requests.request("GET", url, headers=headers)
     json_object = json.loads(response.text)
@@ -56,9 +60,9 @@ def select_page(account, page_id):
 
 # Retrieve block children
 # usage example: notion.select_page_contents(notion.PUBLIC, "c4e4c3b3-8747-4a93-ba4a-7b148d5ca8dc")
-def select_page_contents(account, page_id):
+def select_page_contents(account, notion_page_id):
     headers = get_headers(account)
-    url = "https://api.notion.com/v1/blocks/" + page_id + "/children"
+    url = "https://api.notion.com/v1/blocks/" + notion_page_id + "/children"
 
     response = requests.request("GET", url, headers=headers)
     json_object = json.loads(response.text)
@@ -129,10 +133,10 @@ def select_page_not_synced(account):
 
 
 # update notion page.
-# usage example: notion.update_page_properties(notion_account, page_id, notion_properties)
-def update_page_properties(account, page_id, properties):
+# usage example: notion.update_page_properties(notion_account, notion_page_id, notion_properties)
+def update_page_properties(account, notion_page_id, properties):
     headers = get_headers(account)
-    url = "https://api.notion.com/v1/pages/" + page_id
+    url = "https://api.notion.com/v1/pages/" + notion_page_id
 
     response = requests.request("PATCH", url, headers=headers, json=properties)
     json_object = json.loads(response.text)
