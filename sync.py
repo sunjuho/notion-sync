@@ -136,8 +136,7 @@ def sync_form_notion_to_task(notion_account, task_account):
 
                     synced_task = task.select_task(task_account, google_task_id)
 
-                    if update_task['title'] != synced_task['title'] or update_task['status'] != synced_task['status'] and \
-                            update_task['due'] != synced_task['due']:
+                    if update_task['title'] != synced_task['title'] or update_task['status'] != synced_task['status'] or update_task['due'] != synced_task['due']:
                         task.patch_task(task_account, google_task_id, update_task)
                         # 변동 기록 시간 최신화
                         notion_account['LAST_SYNCED_TIME'] = page['last_edited_time']
