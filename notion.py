@@ -37,8 +37,10 @@ def select_pages(account):
         # str to json
         json_object = json.loads(response.text)
         items = json_object["results"]
+        '''
         for item in items:
             print(item)
+        '''
         return items
 
     except:
@@ -54,7 +56,7 @@ def select_page(account, notion_page_id):
     response = requests.request("GET", url, headers=headers)
     json_object = json.loads(response.text)
     item = json_object
-    print(item)
+    #print(item)
     return item
 
 

@@ -7,10 +7,12 @@ import datetime
 def get_task_from_notion(page):
     insert_task = {}
 
-    title = page['properties']['Todo']['title'][0]['text']['content']
-    if title:
-        insert_task["title"] = title
-        print("타이틀 : " + title)
+    title = ""
+    if page['properties']['Todo']['title']:
+        title = page['properties']['Todo']['title'][0]['text']['content']
+
+    insert_task["title"] = title
+    print("타이틀 : " + title)
 
     if page['properties']['완료']['checkbox']:
         status = "completed"
@@ -90,8 +92,8 @@ def update_task_from_notion(notion_account, task_account):
 
 
 # notion_keys파일에 마지막 동기화 시간 수정
-def update_notion_keys_file(notion_account_personal, notion_account_public, ):
-    json_object = {'PERSONAL': notion_account_personal, 'PUBLIC': notion_account_public}
+def update_notion_keys_file():
+    json_object = {'PERSONAL': notion.PERSONAL, 'PUBLIC': notion.PUBLIC}
     file = open('keys/notion_keys.json', 'w')
     json.dump(json_object, file)
     file.close()
@@ -138,8 +140,6 @@ def sync_form_notion_to_task(notion_account, task_account):
 
                     if update_task['title'] != synced_task['title'] or update_task['status'] != synced_task['status'] or update_task['due'] != synced_task['due']:
                         task.patch_task(task_account, google_task_id, update_task)
-                        # 변동 기록 시간 최신화
-                        notion_account['LAST_SYNCED_TIME'] = page['last_edited_time']
 
                 notion_account['past_pages'].pop(notion_page_id)
             # 미연동
@@ -152,11 +152,12 @@ def sync_form_notion_to_task(notion_account, task_account):
         for past_notion_page_id in notion_account['past_pages'].keys():
 
             page = notion.select_page(notion_account, past_notion_page_id)
-            # 노션에서 삭제된 경우
-            if page is None:
+            # 노션에서 삭제된 경우 page['archived']
+            if page['archived']:
                 past_google_task_id = notion_account['past_pages'][past_notion_page_id]
-                task.delete_task(task_account, past_google_task_id) # todo : delete_task 만들기
+                task.delete_task(task_account, past_google_task_id)
 
+    notion_account['LAST_SYNCED_TIME'] = search_time
     notion_account['past_pages'] = notion_account['now_pages']
     notion_account['now_pages'] = {}
 

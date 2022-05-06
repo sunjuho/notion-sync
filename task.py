@@ -41,11 +41,10 @@ if not creds or not creds.valid:
     with open('keys/token.json', 'w') as token:
         token.write(creds.to_json())
 
-service = build('tasks', 'v1', credentials=creds)
-
 
 def select_task_list():
     try:
+        service = build('tasks', 'v1', credentials=creds)
         # Call the Tasks API
         results = service.tasklists().list(maxResults=10).execute()
         items = results.get('items', [])
@@ -67,6 +66,7 @@ def select_task_list():
 
 def select_tasks(task_list):
     try:
+        service = build('tasks', 'v1', credentials=creds)
         # Call the Tasks API
         results = service.tasks().list(tasklist=task_list).execute()
         items = results.get('items', [])
@@ -89,6 +89,7 @@ def select_tasks(task_list):
 
 def create_task(task_list, task):
     try:
+        service = build('tasks', 'v1', credentials=creds)
         # Call the Tasks API
         result = service.tasks().insert(tasklist=task_list, body=task).execute()
         print(result)
@@ -100,9 +101,10 @@ def create_task(task_list, task):
 
 def select_task(task_list, task_id):
     try:
+        service = build('tasks', 'v1', credentials=creds)
         # Call the Tasks API
         result = service.tasks().get(tasklist=task_list, task=task_id).execute()
-        print(result)
+        # print(result)
         return result
 
     except HttpError as err:
@@ -111,10 +113,21 @@ def select_task(task_list, task_id):
 
 def patch_task(task_list, task_id, task):
     try:
+        service = build('tasks', 'v1', credentials=creds)
         # Call the Tasks API
         result = service.tasks().patch(tasklist=task_list, task=task_id, body=task).execute()
         print(result)
         return result['updated']
+
+    except HttpError as err:
+        print(err)
+
+
+def delete_task(task_list, task_id):
+    try:
+        service = build('tasks', 'v1', credentials=creds)
+        # Call the Tasks API
+        service.tasks().delete(tasklist=task_list, task=task_id).execute()
 
     except HttpError as err:
         print(err)
