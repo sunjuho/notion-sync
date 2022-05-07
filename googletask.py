@@ -64,34 +64,28 @@ def select_task_list():
         print(err)
 
 
-def select_tasks(task_list):
+def select_tasks(account):
     try:
         service = build('tasks', 'v1', credentials=creds)
         # Call the Tasks API
-        results = service.tasks().list(tasklist=task_list).execute()
+        results = service.tasks().list(tasklist=account["TASKLIST_ID"], maxResults=100).execute()
         items = results.get('items', [])
 
         if not items:
             print('No tasks found.')
             return
 
-        print('Tasks:')
-        tasks = {}
-        for item in items:
-            print(u'{0} ( {1} )'.format(item['title'], item['id']))
-            print(item)
-            tasks[item['title']] = item['id']
-        return tasks
+        return items
 
     except HttpError as err:
         print(err)
 
 
-def create_task(task_list, task):
+def create_task(account, task):
     try:
         service = build('tasks', 'v1', credentials=creds)
         # Call the Tasks API
-        result = service.tasks().insert(tasklist=task_list, body=task).execute()
+        result = service.tasks().insert(tasklist=account["TASKLIST_ID"], body=task).execute()
         print(result)
         return result['id']
 
@@ -99,23 +93,23 @@ def create_task(task_list, task):
         print(err)
 
 
-def select_task(task_list, task_id):
+def select_task(account, task_id):
     try:
         service = build('tasks', 'v1', credentials=creds)
         # Call the Tasks API
-        result = service.tasks().get(tasklist=task_list, task=task_id).execute()
-        # print(result)
+        result = service.tasks().get(tasklist=account["TASKLIST_ID"], task=task_id).execute()
+        print(result)
         return result
 
     except HttpError as err:
         print(err)
 
 
-def patch_task(task_list, task_id, task):
+def patch_task(account, task_id, task):
     try:
         service = build('tasks', 'v1', credentials=creds)
         # Call the Tasks API
-        result = service.tasks().patch(tasklist=task_list, task=task_id, body=task).execute()
+        result = service.tasks().patch(tasklist=account["TASKLIST_ID"], task=task_id, body=task).execute()
         print(result)
         return result['updated']
 
@@ -123,11 +117,11 @@ def patch_task(task_list, task_id, task):
         print(err)
 
 
-def delete_task(task_list, task_id):
+def delete_task(account, task_id):
     try:
         service = build('tasks', 'v1', credentials=creds)
         # Call the Tasks API
-        service.tasks().delete(tasklist=task_list, task=task_id).execute()
+        service.tasks().delete(tasklist=account["TASKLIST_ID"], task=task_id).execute()
 
     except HttpError as err:
         print(err)

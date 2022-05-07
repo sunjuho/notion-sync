@@ -1,5 +1,5 @@
 import notion
-import task
+import googletask
 import sync
 
 import time
@@ -8,11 +8,11 @@ import schedule
 
 
 def syncronize_creation():
-    sync.create_task_from_notion(notion.PUBLIC, task.PUBLIC)
-    sync.create_task_from_notion(notion.PERSONAL, task.PERSONAL)
+    sync.create_task_from_notion(notion.PUBLIC, googletask.PUBLIC)
+    sync.create_task_from_notion(notion.PERSONAL, googletask.PERSONAL)
 
-    notion.PUBLIC = sync.update_task_from_notion(notion.PUBLIC, task.PUBLIC)
-    notion.PERSONAL = sync.update_task_from_notion(notion.PERSONAL, task.PERSONAL)
+    notion.PUBLIC = sync.update_task_from_notion(notion.PUBLIC, googletask.PUBLIC)
+    notion.PERSONAL = sync.update_task_from_notion(notion.PERSONAL, googletask.PERSONAL)
 
     sync.update_notion_keys_file()
 
@@ -32,19 +32,18 @@ while True:
 
 def main_init():
     print('main_init_run')
-    sync.init_read_notion(notion.PERSONAL, task.PERSONAL)
-    sync.init_read_notion(notion.PUBLIC, task.PUBLIC)
+    sync.init_read_notion(notion.PERSONAL, googletask.PERSONAL)
+    sync.init_read_notion(notion.PUBLIC, googletask.PUBLIC)
 
 
 def main_sync():
     print('main_sync_run')
-    sync.sync_form_notion_to_task(notion.PERSONAL, task.PERSONAL)
-    sync.sync_form_notion_to_task(notion.PUBLIC, task.PUBLIC)
+    sync.sync_from_notion_to_task(notion.PERSONAL, googletask.PERSONAL)
+    sync.sync_from_notion_to_task(notion.PUBLIC, googletask.PUBLIC)
     sync.update_notion_keys_file()
 
 
-#main_init()
-main_sync()
+main_init()
 schedule.every(5).minutes.do(main_sync)
 #'''
 while True:

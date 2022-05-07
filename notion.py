@@ -79,10 +79,8 @@ def select_page_contents(account, notion_page_id):
 def create_page(account, page):
     headers = get_headers(account)
     url = "https://api.notion.com/v1/pages"
-    # json to text
-    page = json.dumps(page)
 
-    response = requests.request("POST", url, headers=headers, data=page)
+    response = requests.request("POST", url, headers=headers, json=page)
     json_object = json.loads(response.text)
     item = json_object
     print(item)
@@ -105,10 +103,12 @@ def select_page_by_google_task_id(account, task_id):
 
     response = requests.request("POST", url, headers=headers, json=search_filter)
     json_object = json.loads(response.text)
-    item = json_object["results"][0]
-    print(item)
-    return item
-
+    if json_object["results"]:
+        item = json_object["results"][0]
+        print(item)
+        return item
+    else:
+        return None
 
 # usage example: notion.select_page_not_synced(notion.PUBLIC)
 def select_page_not_synced(account):
