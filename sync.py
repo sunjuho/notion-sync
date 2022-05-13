@@ -22,10 +22,11 @@ def get_task_from_page(page):
     insert_task["status"] = status
     print("완료 : " + status)
 
+    due = ""
     if page['properties']['일자']['date']:
         due = page['properties']['일자']['date']['start'] + "T00:00:00.000Z"
-        insert_task["due"] = due
-        print("일자 : " + due)
+    insert_task["due"] = due
+    print("일자 : " + due)
 
     return insert_task
 
@@ -187,7 +188,7 @@ def init_read_notion(notion_account, task_account):
 # 주기적 싱크 동작
 def sync_from_notion_to_task(notion_account, task_account):
     notion_account['NOW_PAGES'] = {}
-    d = datetime.datetime.utcnow()  # <-- get time in UTC
+    d = datetime.datetime.utcnow() - datetime.timedelta(minutes=5)
     search_time = d.isoformat("T") + "Z"
     pages = notion.select_pages(notion_account)
 
@@ -204,7 +205,7 @@ def sync_from_notion_to_task(notion_account, task_account):
 
                     synced_task = googletask.select_task(task_account, google_task_id)
 
-                    if update_task['title'] != synced_task['title'] or update_task['status'] != synced_task['status']:
+                    if update_task['title'] != synced_task['title'] or update_task['status'] != synced_task['status'] or update_task['due'] != synced_task['due']:
                         googletask.patch_task(task_account, google_task_id, update_task)
 
                 notion_account['PAST_PAGES'].pop(notion_page_id)

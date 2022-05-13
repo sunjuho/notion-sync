@@ -98,6 +98,9 @@ def select_task(account, task_id):
         service = build('tasks', 'v1', credentials=creds)
         # Call the Tasks API
         result = service.tasks().get(tasklist=account["TASKLIST_ID"], task=task_id).execute()
+        if 'due' not in result:
+            result['due'] = ""
+
         print(result)
         return result
 
