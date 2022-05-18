@@ -186,10 +186,8 @@ def init_read_notion(notion_account, task_account):
 
 
 # 주기적 싱크 동작
-def sync_from_notion_to_task(notion_account, task_account):
+def sync_from_notion_to_task(notion_account, task_account, search_time):
     notion_account['NOW_PAGES'] = {}
-    d = datetime.datetime.utcnow() - datetime.timedelta(minutes=5)
-    search_time = d.isoformat("T") + "Z"
     pages = notion.select_pages(notion_account)
 
     if pages:

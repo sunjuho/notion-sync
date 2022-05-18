@@ -1,3 +1,5 @@
+import datetime
+
 import notion
 import googletask
 import sync
@@ -38,12 +40,15 @@ def main_init():
 
 def main_sync():
     print('main_sync_run')
-    sync.sync_from_notion_to_task(notion.PERSONAL, googletask.PERSONAL)
-    sync.sync_from_notion_to_task(notion.PUBLIC, googletask.PUBLIC)
+    d = datetime.datetime.utcnow() - datetime.timedelta(minutes=5)
+    search_time = d.isoformat("T") + "Z"
+    sync.sync_from_notion_to_task(notion.PERSONAL, googletask.PERSONAL, search_time)
+    sync.sync_from_notion_to_task(notion.PUBLIC, googletask.PUBLIC, search_time)
     sync.update_notion_keys_file()
 
 
 main_init()
+main_sync()
 schedule.every(5).minutes.do(main_sync)
 #'''
 while True:
