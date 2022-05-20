@@ -167,7 +167,6 @@ def update_notion_keys_file():
 
 # 켜질 때 최초 동작. 읽고, past_pages 생성. 이후 이 past_pages로 트리거 동작.
 def init_read_notion(notion_account, task_account):
-    notion_account['PAST_PAGES'] = {}
     pages = notion.select_pages(notion_account)
 
     if pages:
@@ -181,6 +180,7 @@ def init_read_notion(notion_account, task_account):
             # 미연동
             else:
                 google_task_id = create_task_from_page(notion_account, task_account, page)
+                task_account['PAST_TASKS'][google_task_id] = notion_page_id
 
             notion_account['PAST_PAGES'][notion_page_id] = google_task_id
 
@@ -199,12 +199,12 @@ def sync_from_notion_to_task(notion_account, task_account, search_time):
                 google_task_id = page['properties']['google task id']['rich_text'][0]['text']['content']
 
                 if page['last_edited_time'] > notion_account['LAST_SYNCED_TIME']:
-                    update_task = get_task_from_page(page)
+                    task_object = get_task_from_page(page)
+                    task = googletask.select_task(task_account, google_task_id)
 
-                    synced_task = googletask.select_task(task_account, google_task_id)
-
-                    if update_task['title'] != synced_task['title'] or update_task['status'] != synced_task['status'] or update_task['due'] != synced_task['due']:
-                        googletask.patch_task(task_account, google_task_id, update_task)
+                    if task_object['title'] != task['title'] or task_object['status'] != task['status'] or task_object['due'] != task['due']:
+                        if page['last_edited_time'] > task['updated']:
+                            googletask.patch_task(task_account, google_task_id, task_object)
 
                 notion_account['PAST_PAGES'].pop(notion_page_id)
             # 미연동
@@ -264,8 +264,6 @@ def create_page_from_task(notion_account, task):
 
 
 def init_read_task(notion_account, task_account):
-    task_account['PAST_TASKS'] = {}
-    pages = notion.select_pages(notion_account)
     tasks = googletask.select_tasks(task_account)
 
     if tasks:
@@ -280,13 +278,18 @@ def init_read_task(notion_account, task_account):
             # 미연동
             else:
                 notion_page_id = create_page_from_task(notion_account, task)
+                notion_account['PAST_PAGES'][notion_page_id] = google_task_id
 
             task_account['PAST_TASKS'][google_task_id] = notion_page_id
 
 
 def init_read(notion_account, task_account):
+    notion_account['PAST_PAGES'] = {}
+    task_account['PAST_TASKS'] = {}
+
     init_read_notion(notion_account, task_account)
     init_read_task(notion_account, task_account)
 
 
-#init_read(notion.PERSONAL, googletask.PERSONAL)
+# init_read(notion.PERSONAL, googletask.PERSONAL)
+# init_read(notion.PUBLIC, googletask.PUBLIC)
