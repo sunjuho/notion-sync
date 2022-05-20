@@ -47,6 +47,19 @@ def select_pages(account):
         print("err")
 
 
+# Create a page with content
+# usage example: notion.create_page(notion.PERSONAL, page)
+def create_page(account, page):
+    headers = get_headers(account)
+    url = "https://api.notion.com/v1/pages"
+
+    response = requests.request("POST", url, headers=headers, json=page)
+    json_object = json.loads(response.text)
+    item = json_object
+    print(item)
+    return item
+
+
 # Retrieve a page
 # usage example: notion.select_page(notion.PUBLIC, "c4e4c3b3-8747-4a93-ba4a-7b148d5ca8dc")
 def select_page(account, notion_page_id):
@@ -56,7 +69,7 @@ def select_page(account, notion_page_id):
     response = requests.request("GET", url, headers=headers)
     json_object = json.loads(response.text)
     item = json_object
-    #print(item)
+    # print(item)
     return item
 
 
@@ -72,19 +85,6 @@ def select_page_contents(account, notion_page_id):
     for item in items:
         print(item)
     return items
-
-
-# Create a page with content
-# usage example: notion.create_page(notion.PERSONAL, page)
-def create_page(account, page):
-    headers = get_headers(account)
-    url = "https://api.notion.com/v1/pages"
-
-    response = requests.request("POST", url, headers=headers, json=page)
-    json_object = json.loads(response.text)
-    item = json_object
-    print(item)
-    return item
 
 
 # usage example: notion.select_page_by_google_task_id(notion.PUBLIC, "dHRVYWtGUXFhckZuMjk3ZQ")
@@ -105,11 +105,15 @@ def select_page_by_google_task_id(account, task_id):
     json_object = json.loads(response.text)
     if json_object["results"]:
         item = json_object["results"][0]
+        '''
         print(item)
+        '''
         return item
     else:
         return None
 
+
+# todo: delete
 # usage example: notion.select_page_not_synced(notion.PUBLIC)
 def select_page_not_synced(account):
     headers = get_headers(account)
@@ -149,6 +153,7 @@ def update_page_properties(account, notion_page_id, properties):
     return item
 
 
+# todo: delete
 # 특정 시간 이후로(optional), 최근 편집순 정렬 조회.
 # usage example: notion.select_page_edited(notion.PUBLIC, last_synced_time='2022-04-18T11:43:00.000Z')
 def select_page_edited(account, last_synced_time=None):
@@ -183,5 +188,6 @@ def select_page_edited(account, last_synced_time=None):
     return items
 
 
+# todo: delete
 def get_task_id_from_page(page):
     return page['properties']['google task id']['rich_text'][0]['text']['content']

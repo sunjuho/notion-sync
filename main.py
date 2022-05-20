@@ -40,16 +40,16 @@ def main_init():
 
 def main_sync():
     print('main_sync_run')
-    d = datetime.datetime.utcnow() - datetime.timedelta(minutes=5)
-    search_time = d.isoformat("T") + "Z"
-    sync.sync_from_notion_to_task(notion.PERSONAL, googletask.PERSONAL, search_time)
-    sync.sync_from_notion_to_task(notion.PUBLIC, googletask.PUBLIC, search_time)
-    sync.update_notion_keys_file()
+    search_time = ( datetime.datetime.utcnow() - datetime.timedelta(minutes=5) ).isoformat("T") + "Z"
+    print(search_time)
+    sync.syncronize(notion.PERSONAL, googletask.PERSONAL, search_time)
+    sync.syncronize(notion.PUBLIC, googletask.PUBLIC, search_time)
+    sync.update_keys_file()
 
 
 main_init()
 main_sync()
-schedule.every(1).minutes.do(main_sync)
+schedule.every(5).minutes.do(main_sync)
 #'''
 while True:
     schedule.run_pending()
