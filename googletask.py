@@ -68,7 +68,7 @@ def select_tasks(account):
     try:
         service = build('tasks', 'v1', credentials=creds)
         # Call the Tasks API
-        results = service.tasks().list(tasklist=account["TASKLIST_ID"], maxResults=100).execute()
+        results = service.tasks().list(tasklist=account["TASKLIST_ID"], maxResults=100, showHidden=True).execute()
         items = results.get('items', [])
 
         if not items:
