@@ -19,7 +19,7 @@ def get_task_from_page(page):
         status = "completed"
     else:
         status = "needsAction"
-    insert_task["status"] = status
+    insert_task['status'] = status
     print("완료 : " + status)
 
     due = ""
@@ -162,24 +162,28 @@ def update_task_from_notion(notion_account, task_account):
 
 # notion_keys파일에 마지막 동기화 시간 수정
 def update_keys_file():
-    json_object_notion_personal = {'BEARER_TOKEN': notion.PERSONAL['BEARER_TOKEN'],
-                                   'DATABASE_ID': notion.PERSONAL['DATABASE_ID'],
-                                   'LAST_SYNCED_TIME': notion.PERSONAL['LAST_SYNCED_TIME']}
+    json_object_notion_personal = {}
+    json_object_notion_personal['BEARER_TOKEN'] = notion.PERSONAL['BEARER_TOKEN']
+    json_object_notion_personal['DATABASE_ID'] = notion.PERSONAL['DATABASE_ID']
+    json_object_notion_personal['LAST_SYNCED_TIME'] = notion.PERSONAL['LAST_SYNCED_TIME']
 
-    json_object_notion_public = {'BEARER_TOKEN': notion.PUBLIC['BEARER_TOKEN'],
-                                 'DATABASE_ID': notion.PUBLIC['DATABASE_ID'],
-                                 'LAST_SYNCED_TIME': notion.PUBLIC['LAST_SYNCED_TIME']}
+    json_object_notion_public = {}
+    json_object_notion_public['BEARER_TOKEN'] = notion.PUBLIC['BEARER_TOKEN']
+    json_object_notion_public['DATABASE_ID'] = notion.PUBLIC['DATABASE_ID']
+    json_object_notion_public['LAST_SYNCED_TIME'] = notion.PUBLIC['LAST_SYNCED_TIME']
 
     json_object = {'PERSONAL': json_object_notion_personal, 'PUBLIC': json_object_notion_public}
     file = open('keys/notion_keys.json', 'w')
     json.dump(json_object, file)
     file.close()
 
-    json_object_task_personal = {'TASKLIST_ID': googletask.PERSONAL['TASKLIST_ID'],
-                                 'LAST_SYNCED_TIME': googletask.PERSONAL['LAST_SYNCED_TIME']}
+    json_object_task_personal = {}
+    json_object_task_personal['TASKLIST_ID'] = googletask.PERSONAL['TASKLIST_ID']
+    json_object_task_personal['LAST_SYNCED_TIME'] = googletask.PERSONAL['LAST_SYNCED_TIME']
 
-    json_object_task_public = {'TASKLIST_ID': googletask.PUBLIC['TASKLIST_ID'],
-                               'LAST_SYNCED_TIME': googletask.PUBLIC['LAST_SYNCED_TIME']}
+    json_object_task_public = {}
+    json_object_task_public['TASKLIST_ID'] = googletask.PERSONAL['TASKLIST_ID']
+    json_object_task_public['LAST_SYNCED_TIME'] = googletask.PERSONAL['LAST_SYNCED_TIME']
 
     json_object = {'PERSONAL': json_object_task_personal, 'PUBLIC': json_object_task_public}
     file = open('keys/task_keys.json', 'w')
@@ -226,12 +230,15 @@ def sync_from_notion_to_task(notion_account, task_account, search_time):
 
                     if task_object['title'] != task['title'] or task_object['status'] != task['status'] or task_object['due'] != task['due']:
                         if page['last_edited_time'] > task['updated']:
+                            print("################################################################ 노션 > 태스크 수정")
                             googletask.patch_task(task_account, google_task_id, task_object)
 
                 notion_account['PAST_PAGES'].pop(notion_page_id)
             # 미연동
             else:
+                print("################################################################ 노션 > 태스크 생성")
                 google_task_id = create_task_from_page(notion_account, task_account, page)
+                task_account['PAST_TASKS'][google_task_id] = notion_page_id
 
             notion_account['NOW_PAGES'][notion_page_id] = google_task_id
 
@@ -241,8 +248,10 @@ def sync_from_notion_to_task(notion_account, task_account, search_time):
             page = notion.select_page(notion_account, past_notion_page_id)
             # 노션에서 삭제된 경우 page['archived']
             if page['archived']:
+                print("################################################################ 노션 > 태스크 삭제")
                 past_google_task_id = notion_account['PAST_PAGES'][past_notion_page_id]
                 googletask.delete_task(task_account, past_google_task_id)
+                task_account['PAST_TASKS'].pop(past_google_task_id)
 
     notion_account['LAST_SYNCED_TIME'] = search_time
     notion_account['PAST_PAGES'] = notion_account['NOW_PAGES']
@@ -324,11 +333,10 @@ def sync_from_task_to_notion(notion_account, task_account, search_time):
                 if task['updated'] > task_account['LAST_SYNCED_TIME']:
                     task_object = get_task_from_page(page)
 
-                    if task_object['title'] != task['title'] or task_object['status'] != task['status'] or task_object[
-                        'due'] != task['due']:
+                    if task_object['title'] != task['title'] or task_object['status'] != task['status'] or task_object['due'] != task['due']:
                         if task['updated'] > page['last_edited_time']:
                             # task를 notion_properties로 바꿔서 수정.
-                            print("################################################################태스크 > 노션 업데이트")
+                            print("################################################################ 태스크 > 노션 수정")
                             notion_properties = get_update_page_from_task(task)
                             notion.update_page_properties(notion_account, notion_page_id, notion_properties)
 
@@ -336,7 +344,9 @@ def sync_from_task_to_notion(notion_account, task_account, search_time):
             # 미연동
             else:
                 # 태스크로 노션 생성
+                print("################################################################ 태스크 > 노션 생성")
                 notion_page_id = create_page_from_task(notion_account, task)
+                notion_account['PAST_PAGES'][notion_page_id] = google_task_id
 
             task_account['NOW_TASKS'][google_task_id] = notion_page_id
 
@@ -345,10 +355,11 @@ def sync_from_task_to_notion(notion_account, task_account, search_time):
 
             task = googletask.select_task(task_account, past_google_task_id)
             # 태스크에서 삭제된 경우 task['deleted']
-            if task['deleted']:
-                print("###################################################################태스크 > 노션 딜리트")
+            if 'deleted' in task:
+                print("################################################################ 태스크 > 노션 삭제")
                 # past_page_id = notion.select_page_by_google_task_id(notion_account, past_google_task_id)['id']
                 # todo : notion.delete_page(notion_account, past_page_id)
+                # notion_account['PAST_PAGES'].pop(past_page_id)
 
     task_account['LAST_SYNCED_TIME'] = search_time
     task_account['PAST_TASKS'] = task_account['NOW_TASKS']
