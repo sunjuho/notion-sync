@@ -353,9 +353,9 @@ def sync_from_task_to_notion(notion_account, task_account, search_time):
             # 태스크에서 삭제된 경우 task['deleted']
             if 'deleted' in task:
                 print("################################################################ 태스크 > 노션 삭제")
-                # past_page_id = notion.select_page_by_google_task_id(notion_account, past_google_task_id)['id']
-                # todo : notion.delete_page(notion_account, past_page_id)
-                # notion_account['PAST_PAGES'].pop(past_page_id)
+                past_page_id = notion.select_page_by_google_task_id(notion_account, past_google_task_id)['id']
+                notion.delete_page(notion_account, past_page_id)
+                notion_account['PAST_PAGES'].pop(past_page_id)
 
     task_account['LAST_SYNCED_TIME'] = search_time
     task_account['PAST_TASKS'] = task_account['NOW_TASKS']

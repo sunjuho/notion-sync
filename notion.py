@@ -153,6 +153,19 @@ def update_page_properties(account, notion_page_id, properties):
     return item
 
 
+def delete_page(account, notion_page_id):
+    headers = get_headers(account)
+    url = "https://api.notion.com/v1/blocks/" + notion_page_id
+
+    response = requests.request("DELETE", url, headers=headers)
+    json_object = json.loads(response.text)
+
+    item = json_object
+    if item is not None:
+        print(item)
+    return item
+
+
 # todo: delete
 # 특정 시간 이후로(optional), 최근 편집순 정렬 조회.
 # usage example: notion.select_page_edited(notion.PUBLIC, last_synced_time='2022-04-18T11:43:00.000Z')
