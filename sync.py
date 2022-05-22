@@ -162,28 +162,24 @@ def update_task_from_notion(notion_account, task_account):
 
 # notion_keys파일에 마지막 동기화 시간 수정
 def update_keys_file():
-    json_object_notion_personal = {}
-    json_object_notion_personal['BEARER_TOKEN'] = notion.PERSONAL['BEARER_TOKEN']
-    json_object_notion_personal['DATABASE_ID'] = notion.PERSONAL['DATABASE_ID']
-    json_object_notion_personal['LAST_SYNCED_TIME'] = notion.PERSONAL['LAST_SYNCED_TIME']
+    json_object_notion_personal = {'BEARER_TOKEN': notion.PERSONAL['BEARER_TOKEN'],
+                                   'DATABASE_ID': notion.PERSONAL['DATABASE_ID'],
+                                   'LAST_SYNCED_TIME': notion.PERSONAL['LAST_SYNCED_TIME']}
 
-    json_object_notion_public = {}
-    json_object_notion_public['BEARER_TOKEN'] = notion.PUBLIC['BEARER_TOKEN']
-    json_object_notion_public['DATABASE_ID'] = notion.PUBLIC['DATABASE_ID']
-    json_object_notion_public['LAST_SYNCED_TIME'] = notion.PUBLIC['LAST_SYNCED_TIME']
+    json_object_notion_public = {'BEARER_TOKEN': notion.PUBLIC['BEARER_TOKEN'],
+                                 'DATABASE_ID': notion.PUBLIC['DATABASE_ID'],
+                                 'LAST_SYNCED_TIME': notion.PUBLIC['LAST_SYNCED_TIME']}
 
     json_object = {'PERSONAL': json_object_notion_personal, 'PUBLIC': json_object_notion_public}
     file = open('keys/notion_keys.json', 'w')
     json.dump(json_object, file)
     file.close()
 
-    json_object_task_personal = {}
-    json_object_task_personal['TASKLIST_ID'] = googletask.PERSONAL['TASKLIST_ID']
-    json_object_task_personal['LAST_SYNCED_TIME'] = googletask.PERSONAL['LAST_SYNCED_TIME']
+    json_object_task_personal = {'TASKLIST_ID': googletask.PERSONAL['TASKLIST_ID'],
+                                 'LAST_SYNCED_TIME': googletask.PERSONAL['LAST_SYNCED_TIME']}
 
-    json_object_task_public = {}
-    json_object_task_public['TASKLIST_ID'] = googletask.PERSONAL['TASKLIST_ID']
-    json_object_task_public['LAST_SYNCED_TIME'] = googletask.PERSONAL['LAST_SYNCED_TIME']
+    json_object_task_public = {'TASKLIST_ID': googletask.PUBLIC['TASKLIST_ID'],
+                               'LAST_SYNCED_TIME': googletask.PUBLIC['LAST_SYNCED_TIME']}
 
     json_object = {'PERSONAL': json_object_task_personal, 'PUBLIC': json_object_task_public}
     file = open('keys/task_keys.json', 'w')
