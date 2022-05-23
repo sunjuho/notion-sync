@@ -54,7 +54,7 @@ def main_sync():
     sync.syncronize(notion.PERSONAL, googletask.PERSONAL, base_time)
     sync.syncronize(notion.PUBLIC, googletask.PUBLIC, base_time)
     # sync.update_keys_file()
-    sync.update_last_synced_time(base_time)
+    sync.update_last_synced_time(datetime.datetime.utcnow().isoformat())
 
 
 main_init()
