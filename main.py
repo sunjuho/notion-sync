@@ -4,10 +4,9 @@ import notion
 import googletask
 import sync
 
-import time
 # pip install schedule
 import schedule
-
+import time
 
 # def syncronize_creation():
 #     sync.create_task_from_notion(notion.PUBLIC, googletask.PUBLIC)
@@ -34,26 +33,34 @@ while True:
 
 def main_init():
     print('main_init_run')
+
     sync.init_read(notion.PERSONAL, googletask.PERSONAL)
     sync.init_read(notion.PUBLIC, googletask.PUBLIC)
 
 
 def main_sync():
     print('main_sync_run')
-    search_time = ( datetime.datetime.utcnow() - datetime.timedelta(minutes=5) ).isoformat("T") + "Z"
-    print(search_time)
-    sync.syncronize(notion.PERSONAL, googletask.PERSONAL, search_time)
-    sync.syncronize(notion.PUBLIC, googletask.PUBLIC, search_time)
-    sync.update_keys_file()
+
+    f = open('base_time.txt', 'r')
+    last_synced_time = f.readline()
+    f.close()
+
+    base_time = (datetime.datetime.utcnow() - datetime.timedelta(minutes=15)).isoformat("T") + "Z"
+
+    base_time = base_time if base_time < last_synced_time else last_synced_time
+
+    print("now : " + datetime.datetime.utcnow().isoformat() + ", base_time : " + base_time)
+
+    sync.syncronize(notion.PERSONAL, googletask.PERSONAL, base_time)
+    sync.syncronize(notion.PUBLIC, googletask.PUBLIC, base_time)
+    # sync.update_keys_file()
+    sync.update_last_synced_time(base_time)
 
 
 main_init()
 main_sync()
-schedule.every(5).minutes.do(main_sync)
-#'''
+schedule.every(10).minutes.do(main_sync)
+
 while True:
     schedule.run_pending()
     time.sleep(1)
-#'''
-
-# notion.PERSONAL

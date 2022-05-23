@@ -187,6 +187,12 @@ def update_keys_file():
     file.close()
 
 
+def update_last_synced_time(base_time):
+    f = open('base_time.txt', 'w')
+    f.write(base_time)
+    f.close()
+
+
 # 켜질 때 최초 동작. 읽고, past_pages 생성. 이후 이 past_pages로 트리거 동작.
 def init_read_notion(notion_account, task_account):
     pages = notion.select_pages(notion_account)
@@ -208,7 +214,7 @@ def init_read_notion(notion_account, task_account):
 
 
 # 주기적 싱크 동작
-def sync_from_notion_to_task(notion_account, task_account, search_time):
+def sync_from_notion_to_task(notion_account, task_account, base_time):
     notion_account['NOW_PAGES'] = {}
     pages = notion.select_pages(notion_account)
 
@@ -220,7 +226,7 @@ def sync_from_notion_to_task(notion_account, task_account, search_time):
             if page['properties']['google task id']['rich_text']:
                 google_task_id = page['properties']['google task id']['rich_text'][0]['text']['content']
 
-                if page['last_edited_time'] > notion_account['LAST_SYNCED_TIME']:
+                if page['last_edited_time'] > base_time:
                     task_object = get_task_from_page(page)
                     task = googletask.select_task(task_account, google_task_id)
 
@@ -249,7 +255,6 @@ def sync_from_notion_to_task(notion_account, task_account, search_time):
                 googletask.delete_task(task_account, past_google_task_id)
                 task_account['PAST_TASKS'].pop(past_google_task_id)
 
-    notion_account['LAST_SYNCED_TIME'] = search_time
     notion_account['PAST_PAGES'] = notion_account['NOW_PAGES']
     notion_account['NOW_PAGES'] = {}
 
@@ -311,7 +316,7 @@ def init_read_task(notion_account, task_account):
 
 
 # 주기적 싱크 동작
-def sync_from_task_to_notion(notion_account, task_account, search_time):
+def sync_from_task_to_notion(notion_account, task_account, base_time):
     task_account['NOW_TASKS'] = {}
     tasks = googletask.select_tasks(task_account)
 
@@ -326,7 +331,7 @@ def sync_from_task_to_notion(notion_account, task_account, search_time):
             if page:
                 notion_page_id = page['id']
 
-                if task['updated'] > task_account['LAST_SYNCED_TIME']:
+                if task['updated'] > base_time:
                     task_object = get_task_from_page(page)
 
                     if task_object['title'] != task['title'] or task_object['status'] != task['status'] or task_object['due'] != task['due']:
@@ -357,7 +362,6 @@ def sync_from_task_to_notion(notion_account, task_account, search_time):
                 notion.delete_page(notion_account, past_page_id)
                 notion_account['PAST_PAGES'].pop(past_page_id)
 
-    task_account['LAST_SYNCED_TIME'] = search_time
     task_account['PAST_TASKS'] = task_account['NOW_TASKS']
     task_account['NOW_TASKS'] = {}
 
@@ -370,9 +374,6 @@ def init_read(notion_account, task_account):
     init_read_task(notion_account, task_account)
 
 
-def syncronize(notion_account, task_account, search_time):
-    sync_from_notion_to_task(notion_account, task_account, search_time)
-    sync_from_task_to_notion(notion_account, task_account, search_time)
-
-# init_read(notion.PERSONAL, googletask.PERSONAL)
-# init_read(notion.PUBLIC, googletask.PUBLIC)
+def syncronize(notion_account, task_account, base_time):
+    sync_from_notion_to_task(notion_account, task_account, base_time)
+    sync_from_task_to_notion(notion_account, task_account, base_time)
