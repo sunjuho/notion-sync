@@ -60,6 +60,7 @@ def main_sync():
 main_init()
 main_sync()
 schedule.every(10).minutes.do(main_sync)
+schedule.every(1).hours.do(googletask.refresh_token)
 
 while True:
     schedule.run_pending()
