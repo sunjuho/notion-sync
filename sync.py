@@ -1,7 +1,6 @@
 import notion
 import googletask
 import json
-import datetime
 
 
 # notion page로부터 task에 넣을 형태로 변환
@@ -32,7 +31,7 @@ def get_task_from_page(page):
 
 
 # google task로부터 page에 넣을 형태로 변환
-def set_page_from_task(page, task):
+def get_page_from_task(page, task):
     title = task['title']
     todo = {
         "title": [{
@@ -44,25 +43,24 @@ def set_page_from_task(page, task):
     page['properties']['Todo'] = todo
     print("타이틀 : " + title)
 
-    if task['status'] == "needsAction":
-        status = False
-    elif task['status'] == "completed":
+    status = False
+    if task['status'] == "completed":
         status = True
-    완료 = {
+    status_value = {
         "checkbox": status
     }
-    page['properties']['완료'] = 완료
+    page['properties']['완료'] = status_value
     print("완료 : " + task['status'])
 
     if 'due' in task:
         due = task['due'][:10]
-        일자 = {
+        due_value = {
             "date": {
                 "start": due,
                 "end": None
             }
         }
-        page['properties']['일자'] = 일자
+        page['properties']['일자'] = due_value
         print("일자 : " + due)
 
     return page
@@ -85,7 +83,7 @@ def get_insert_page_from_task(notion_account, task):
         }
     }
 
-    return set_page_from_task(insert_page, task)
+    return get_page_from_task(insert_page, task)
 
 
 def get_update_page_from_task(task):
@@ -93,98 +91,41 @@ def get_update_page_from_task(task):
         "properties": {}
     }
 
-    return set_page_from_task(update_page, task)
+    return get_page_from_task(update_page, task)
 
 
-# todo: delete
-# notion에서 읽어서 google task id가 없는, google task 동기화가 안 된 것 찾아서
-# task insert
-# update notion google task id
-def create_task_from_notion(notion_account, task_account):
-    items = notion.select_page_not_synced(notion_account)
+def create_task_from_page(notion_account, task_account, page):
+    notion_page_id = page['id']
+    insert_task = get_task_from_page(page)
 
-    if len(items):
-        for item in items:
-            print(item)
-            notion_page_id = item['id']
+    google_task_id = googletask.create_task(task_account, insert_task)
 
-            insert_task = get_task_from_page(item)
-            """
-            insert_task = {
-                "title": title,
-                "status": status,
-                "due": due
-            }
-            """
-
-            google_task_id = googletask.create_task(task_account, insert_task)
-            print(google_task_id)
-
-            notion_properties = {
-                "properties": {
-                    "google task id": {
-                        "rich_text": [{
-                            "type": "text",
-                            "text": {
-                                "content": google_task_id
-                            }
-                        }]
+    notion_properties = {
+        "properties": {
+            "google task id": {
+                "rich_text": [{
+                    "type": "text",
+                    "text": {
+                        "content": google_task_id
                     }
-                }
+                }]
             }
+        }
+    }
 
-            notion.update_page_properties(notion_account, notion_page_id, notion_properties)
+    notion.update_page_properties(notion_account, notion_page_id, notion_properties)
 
-
-# todo: delete
-# 노션 값으로 태스크 수정. 이후 노션 정보에 최근 수정 정보 최신화.
-def update_task_from_notion(notion_account, task_account):
-    print("동기화 동작 기준 시간 : " + notion_account['LAST_SYNCED_TIME'])
-    pages = notion.select_page_edited(notion_account, last_synced_time=notion_account['LAST_SYNCED_TIME'])
-
-    if len(pages):
-        updated = ""
-        for page in pages:
-            if page['properties']['google task id']['rich_text']:
-                update_task = get_task_from_page(page)
-
-                google_task_id = notion.get_task_id_from_page(page)
-                updated = googletask.patch_task(task_account, google_task_id, update_task)
-
-        # 동기화 성공 시간 기록
-        print("last_synced_time : " + updated)
-        notion_account['LAST_SYNCED_TIME'] = updated
-
-    # togo : pages 가 없더라도 동기화에 성공한 건 맞음.
-
-    return notion_account
+    return google_task_id
 
 
-# notion_keys파일에 마지막 동기화 시간 수정
-def update_keys_file():
-    json_object_notion_personal = {'BEARER_TOKEN': notion.PERSONAL['BEARER_TOKEN'],
-                                   'DATABASE_ID': notion.PERSONAL['DATABASE_ID'],
-                                   'LAST_SYNCED_TIME': notion.PERSONAL['LAST_SYNCED_TIME']}
+def create_page_from_task(notion_account, task):
+    insert_page = get_insert_page_from_task(notion_account, task)
 
-    json_object_notion_public = {'BEARER_TOKEN': notion.PUBLIC['BEARER_TOKEN'],
-                                 'DATABASE_ID': notion.PUBLIC['DATABASE_ID'],
-                                 'LAST_SYNCED_TIME': notion.PUBLIC['LAST_SYNCED_TIME']}
+    page = notion.create_page(notion_account, insert_page)
 
-    json_object = {'PERSONAL': json_object_notion_personal, 'PUBLIC': json_object_notion_public}
-    file = open('keys/notion_keys.json', 'w')
-    json.dump(json_object, file)
-    file.close()
+    notion_page_id = page['id']
 
-    json_object_task_personal = {'TASKLIST_ID': googletask.PERSONAL['TASKLIST_ID'],
-                                 'LAST_SYNCED_TIME': googletask.PERSONAL['LAST_SYNCED_TIME']}
-
-    json_object_task_public = {'TASKLIST_ID': googletask.PUBLIC['TASKLIST_ID'],
-                               'LAST_SYNCED_TIME': googletask.PUBLIC['LAST_SYNCED_TIME']}
-
-    json_object = {'PERSONAL': json_object_task_personal, 'PUBLIC': json_object_task_public}
-    file = open('keys/task_keys.json', 'w')
-    json.dump(json_object, file)
-    file.close()
+    return notion_page_id
 
 
 def update_last_synced_time(base_time):
@@ -207,10 +148,32 @@ def init_read_notion(notion_account, task_account):
 
             # 미연동
             else:
+                print("################################################################ 노션 > 태스크 생성")
                 google_task_id = create_task_from_page(notion_account, task_account, page)
                 task_account['PAST_TASKS'][google_task_id] = notion_page_id
 
             notion_account['PAST_PAGES'][notion_page_id] = google_task_id
+
+
+def init_read_task(notion_account, task_account):
+    tasks = googletask.select_tasks(task_account)
+
+    if tasks:
+        for task in tasks:
+            google_task_id = task['id']
+            page = notion.select_page_by_google_task_id(notion_account, google_task_id)
+
+            # 연동
+            if page:
+                notion_page_id = page['id']
+
+            # 미연동
+            else:
+                print("################################################################ 태스크 > 노션 생성")
+                notion_page_id = create_page_from_task(notion_account, task)
+                notion_account['PAST_PAGES'][notion_page_id] = google_task_id
+
+            task_account['PAST_TASKS'][google_task_id] = notion_page_id
 
 
 # 주기적 싱크 동작
@@ -259,67 +222,10 @@ def sync_from_notion_to_task(notion_account, task_account, base_time):
     notion_account['NOW_PAGES'] = {}
 
 
-def create_task_from_page(notion_account, task_account, page):
-    notion_page_id = page['id']
-    insert_task = get_task_from_page(page)
-
-    google_task_id = googletask.create_task(task_account, insert_task)
-
-    notion_properties = {
-        "properties": {
-            "google task id": {
-                "rich_text": [{
-                    "type": "text",
-                    "text": {
-                        "content": google_task_id
-                    }
-                }]
-            }
-        }
-    }
-
-    notion.update_page_properties(notion_account, notion_page_id, notion_properties)
-
-    return google_task_id
-
-
-def create_page_from_task(notion_account, task):
-    insert_page = get_insert_page_from_task(notion_account, task)
-
-    page = notion.create_page(notion_account, insert_page)
-
-    notion_page_id = page['id']
-
-    notion_account['PAST_PAGES'][notion_page_id] = task['id']
-
-    return notion_page_id
-
-
-def init_read_task(notion_account, task_account):
-    tasks = googletask.select_tasks(task_account)
-
-    if tasks:
-        for task in tasks:
-            google_task_id = task['id']
-            page = notion.select_page_by_google_task_id(notion_account, google_task_id)
-
-            # 연동
-            if page:
-                notion_page_id = page['id']
-
-            # 미연동
-            else:
-                notion_page_id = create_page_from_task(notion_account, task)
-                notion_account['PAST_PAGES'][notion_page_id] = google_task_id
-
-            task_account['PAST_TASKS'][google_task_id] = notion_page_id
-
-
 # 주기적 싱크 동작
 def sync_from_task_to_notion(notion_account, task_account, base_time):
     task_account['NOW_TASKS'] = {}
     tasks = googletask.select_tasks(task_account)
-
     if tasks:
         for task in tasks:
             google_task_id = task['id']

@@ -19,10 +19,6 @@ with open('keys/task_keys.json') as json_file:
 
 # If modifying these scopes, delete the file token.json.
 SCOPES = ['https://www.googleapis.com/auth/tasks']
-
-"""Shows basic usage of the Tasks API.
-Prints the title and ID of the first 10 task lists.
-"""
 creds = None
 
 
