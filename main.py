@@ -18,7 +18,7 @@ def main_init():
 def main_sync():
     print('main_sync_run')
 
-    f = open('base_time.txt', 'r')
+    f = open('keys/base_time.txt', 'r')
     last_synced_time = f.readline()
     f.close()
 
