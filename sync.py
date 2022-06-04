@@ -198,7 +198,8 @@ def sync_from_notion_to_task(notion_account, task_account, base_time):
                             print("################################################################ 노션 > 태스크 수정")
                             googletask.patch_task(task_account, google_task_id, task_object)
 
-                notion_account['PAST_PAGES'].pop(notion_page_id)
+                if notion_page_id in notion_account['PAST_PAGES'].keys():
+                    notion_account['PAST_PAGES'].pop(notion_page_id)
             # 미연동
             else:
                 print("################################################################ 노션 > 태스크 생성")
@@ -216,7 +217,8 @@ def sync_from_notion_to_task(notion_account, task_account, base_time):
                 print("################################################################ 노션 > 태스크 삭제")
                 past_google_task_id = notion_account['PAST_PAGES'][past_notion_page_id]
                 googletask.delete_task(task_account, past_google_task_id)
-                task_account['PAST_TASKS'].pop(past_google_task_id)
+                if past_google_task_id in task_account['PAST_TASKS'].keys():
+                    task_account['PAST_TASKS'].pop(past_google_task_id)
 
     notion_account['PAST_PAGES'] = notion_account['NOW_PAGES']
     notion_account['NOW_PAGES'] = {}
@@ -247,7 +249,8 @@ def sync_from_task_to_notion(notion_account, task_account, base_time):
                             notion_properties = get_update_page_from_task(task)
                             notion.update_page_properties(notion_account, notion_page_id, notion_properties)
 
-                task_account['PAST_TASKS'].pop(google_task_id)
+                if google_task_id in task_account['PAST_TASKS'].keys():
+                    task_account['PAST_TASKS'].pop(google_task_id)
             # 미연동
             else:
                 # 태스크로 노션 생성
@@ -266,7 +269,8 @@ def sync_from_task_to_notion(notion_account, task_account, base_time):
                 print("################################################################ 태스크 > 노션 삭제")
                 past_page_id = notion.select_page_by_google_task_id(notion_account, past_google_task_id)['id']
                 notion.delete_page(notion_account, past_page_id)
-                notion_account['PAST_PAGES'].pop(past_page_id)
+                if past_page_id in notion_account['PAST_PAGES'].keys():
+                    notion_account['PAST_PAGES'].pop(past_page_id)
 
     task_account['PAST_TASKS'] = task_account['NOW_TASKS']
     task_account['NOW_TASKS'] = {}
