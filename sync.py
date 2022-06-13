@@ -202,6 +202,14 @@ def sync_from_notion_to_task(notion_account, task_account, base_time):
                     notion_account['PAST_PAGES'].pop(notion_page_id)
             # 미연동
             else:
+                isDeleted = False
+                for past_task_value in task_account['PAST_TASKS'].values():
+                    if past_task_value == notion_page_id:
+                        isDeleted = True
+
+                if isDeleted:
+                    continue
+
                 print("################################################################ 노션 > 태스크 생성")
                 google_task_id = create_task_from_page(notion_account, task_account, page)
                 task_account['PAST_TASKS'][google_task_id] = notion_page_id
@@ -253,6 +261,14 @@ def sync_from_task_to_notion(notion_account, task_account, base_time):
                     task_account['PAST_TASKS'].pop(google_task_id)
             # 미연동
             else:
+                isDeleted = False
+                for past_page_value in notion_account['PAST_PAGES'].values():
+                    if past_page_value == google_task_id:
+                        isDeleted = True
+
+                if isDeleted:
+                    continue
+
                 # 태스크로 노션 생성
                 print("################################################################ 태스크 > 노션 생성")
                 notion_page_id = create_page_from_task(notion_account, task)
