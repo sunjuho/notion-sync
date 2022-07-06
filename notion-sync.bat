@@ -1,3 +1,3 @@
 :START
-python main.py
+python notion-sync.py
 @GOTO START
