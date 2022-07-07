@@ -25,7 +25,7 @@ def main_sync():
     base_time = (datetime.datetime.utcnow() - datetime.timedelta(minutes=15)).isoformat("T") + "Z"
     base_time = base_time if base_time < last_synced_time else last_synced_time
 
-    print("now : " + datetime.datetime.now() )
+    print("now : " + str(datetime.datetime.now()) )
 
     sync.syncronize(notion.PERSONAL, googletask.PERSONAL, base_time)
     sync.syncronize(notion.PUBLIC, googletask.PUBLIC, base_time)
