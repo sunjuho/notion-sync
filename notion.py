@@ -10,6 +10,7 @@ with open('keys/notion_keys.json') as json_file:
     data = json.load(json_file)
 
     PERSONAL = data['PERSONAL']
+    EXERCISE = data['EXERCISE']
     PUBLIC = data['PUBLIC']
 
 

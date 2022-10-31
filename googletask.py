@@ -15,6 +15,7 @@ with open('keys/task_keys.json') as json_file:
     data = json.load(json_file)
 
     PERSONAL = data['PERSONAL']
+    EXERCISE = data['EXERCISE']
     PUBLIC = data['PUBLIC']
 
 # If modifying these scopes, delete the file token.json.

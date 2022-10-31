@@ -12,6 +12,7 @@ def main_init():
     print('main_init_run')
 
     sync.init_read(notion.PERSONAL, googletask.PERSONAL)
+    sync.init_read(notion.EXERCISE, googletask.EXERCISE)
     sync.init_read(notion.PUBLIC, googletask.PUBLIC)
 
 
@@ -28,6 +29,7 @@ def main_sync():
     print("now : " + str(datetime.datetime.now()) )
 
     sync.syncronize(notion.PERSONAL, googletask.PERSONAL, base_time)
+    sync.syncronize(notion.EXERCISE, googletask.EXERCISE, base_time)
     sync.syncronize(notion.PUBLIC, googletask.PUBLIC, base_time)
     sync.update_last_synced_time(datetime.datetime.utcnow().isoformat())
 
