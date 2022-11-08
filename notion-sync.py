@@ -28,9 +28,9 @@ def main_sync():
 
     print("now : " + str(datetime.datetime.now()) )
 
-    sync.syncronize(notion.PERSONAL, googletask.PERSONAL, base_time)
-    sync.syncronize(notion.EXERCISE, googletask.EXERCISE, base_time)
-    sync.syncronize(notion.PUBLIC, googletask.PUBLIC, base_time)
+    sync.synchronize(notion.PERSONAL, googletask.PERSONAL, base_time)
+    sync.synchronize(notion.EXERCISE, googletask.EXERCISE, base_time)
+    sync.synchronize(notion.PUBLIC, googletask.PUBLIC, base_time)
     sync.update_last_synced_time(datetime.datetime.utcnow().isoformat())
 
 

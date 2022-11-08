@@ -300,6 +300,6 @@ def init_read(notion_account, task_account):
     init_read_task(notion_account, task_account)
 
 
-def syncronize(notion_account, task_account, base_time):
+def synchronize(notion_account, task_account, base_time):
     sync_from_notion_to_task(notion_account, task_account, base_time)
     sync_from_task_to_notion(notion_account, task_account, base_time)
