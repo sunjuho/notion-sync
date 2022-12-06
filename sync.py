@@ -129,7 +129,7 @@ def create_page_from_task(notion_account, task):
 
 
 def update_last_synced_time(base_time):
-    f = open('keys/base_time.txt', 'w')
+    f = open('/git/notion-sync/keys/base_time.txt', 'w')
     f.write(base_time)
     f.close()
 

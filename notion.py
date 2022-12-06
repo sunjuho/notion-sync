@@ -6,7 +6,7 @@ import time
 NOTION_VERSION = "2022-02-22"
 
 # account info
-with open('keys/notion_keys.json') as json_file:
+with open('/git/notion-sync/keys/notion_keys.json') as json_file:
     data = json.load(json_file)
 
     PERSONAL = data['PERSONAL']

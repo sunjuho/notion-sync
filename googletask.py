@@ -11,7 +11,7 @@ from googleapiclient.discovery import build
 from googleapiclient.errors import HttpError
 
 # account info
-with open('keys/task_keys.json') as json_file:
+with open('/git/notion-sync/keys/task_keys.json') as json_file:
     data = json.load(json_file)
 
     PERSONAL = data['PERSONAL']
@@ -29,8 +29,8 @@ creds = None
 def refresh_token():
     global creds
 
-    if os.path.exists('keys/token.json'):
-        creds = Credentials.from_authorized_user_file('keys/token.json', SCOPES)
+    if os.path.exists('/git/notion-sync/keys/token.json'):
+        creds = Credentials.from_authorized_user_file('/git/notion-sync/keys/token.json', SCOPES)
     # If there are no (valid) credentials available, let the user log in.
     if not creds or not creds.valid:
         if creds and creds.expired and creds.refresh_token:
@@ -38,10 +38,10 @@ def refresh_token():
             print("refresh_token")
         else:
             flow = InstalledAppFlow.from_client_secrets_file(
-                'keys/credentials.json', SCOPES)
+                '/git/notion-sync/keys/credentials.json', SCOPES)
             creds = flow.run_local_server(port=0)
         # Save the credentials for the next run
-        with open('keys/token.json', 'w') as token:
+        with open('/git/notion-sync/keys/token.json', 'w') as token:
             token.write(creds.to_json())
 
 
